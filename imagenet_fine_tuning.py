@@ -9,18 +9,33 @@ from Networks.imagenet_traintest import TrainTestHelper
 import argparse
 from Networks.losses import compactnes_loss
 import random
+from plots.plot_helpers import AOC_helper, plot_features, plot_dict
 
 
 
 
+class TestHelper:
+    def __init__(self, ref_dataloader, tar_dataloader, templates_num, test_num, model):
+        self.templates, _ = tar_dataloader.read_batch(templates_num, "train")
+        self.targets, _ = tar_dataloader.read_batch(test_num, "test")
+        self.aliens, _ = ref_dataloader.read_batch(test_num, "test")
+        self.model = model
+
+    def get_roc_aoc(self):
+        return AOC_helper.get_roc_aoc(self.targets, self.aliens, self.templates, self.model)
+
+    def plot_features(self, full_path):
+        plot_features(self.targets, self.aliens, self.templates, self.model, full_path)
 
 
-def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iteration, print_freq, network):
+def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iteration, print_freq, test_helper, output_path):
 
 
     trainstep = trainer.get_step()
     valstep = validator.get_step()
     train_dict = {"iteration":[], "train_D_loss": [], "train_C_loss": [], "val_D_loss": [], "val_C_loss": []}
+    test_dict = {"iteration":[], "auc": [], "target_dists": [], "alien_dists":[]}
+
 
     for i in range(max_iteration):
         ref_batch_x, ref_batch_y = ref_dataloader.read_batch(batches, "train")
@@ -40,6 +55,17 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
             train_dict["val_C_loss"].append(float(validator.C_loss_mean.result()))
 
             print("iteration {} - train :D loss {}, C loss {}, val :D loss {}, C loss {}".format(i + 1, train_dict["train_D_loss"][-1], train_dict["train_C_loss"][-1], train_dict["val_D_loss"][-1], train_dict["val_C_loss"][-1]))
+
+        if i % (2 * print_freq): # test
+            test_dict["iteration"].append(i)
+            test_results = test_helper.get_roc_aoc()
+            test_dict["auc"].append(test_results[3])
+            test_dict["target_dists"].append(test_results[4])
+            test_dict["alien_dists"].append(test_results[5])
+            test_results.plot_features(os.path.join(output_path, "features_after_{}_iterations.png".format(i)))
+
+        plot_dict(test_dict, "iteration", output_path)
+        plot_dict(train_dict, "iteration", output_path)
 
 
 
@@ -109,8 +135,10 @@ def main():
     test_images, labels = ref_dataloader.read_batch(200, "test")
     save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "before_training", args.output_path)
 
+    test_helper = TestHelper(ref_dataloader, tar_dataloader, args.templates_num, args.test_num, network)
 
-    train(ref_dataloader, tar_dataloader, trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, network)
+
+    train(ref_dataloader, tar_dataloader, trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, test_helper, args.output_path)
     save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "after_training", args.output_path)
 
 
