@@ -14,6 +14,9 @@ class PerceptualModel(NNInterface):
     def __init__(self):
         super().__init__()
         self.__model = vgg16.VGG16(weights='imagenet')
+        self.ref_model = self.get_dropout_model(2)
+        self.tar_model = self.get_dropout_model(1)
+        print(self.tar_model.summary())
 
     def get_features_model(self, layer_name):
         layer = self.__model.get_layer(layer_name).output
@@ -21,9 +24,12 @@ class PerceptualModel(NNInterface):
         return model
 
 
-    def call(self, x, training=True):
+    def call(self, x, training=True, ref=True):
         x = vgg16.preprocess_input(x)
-        return self.__model(x, training=training)
+        if ref:
+            return self.ref_model(x, training=training)
+        else:
+            return self.tar_model(x, training=training)
 
     def compute_output_shape(self, input_shape):
         return self.__model.compute_output_shape(input_shape)
@@ -57,3 +63,18 @@ class PerceptualModel(NNInterface):
         # Create a new model
         self.__model = Model(input, predictors)
         # self.__model.summary()
+
+
+    def get_dropout_model(self, dropout_num):
+        model = tf.keras.Sequential()
+
+        dropout1 = Dropout(0.5)
+        dropout2 = Dropout(0.5)
+
+        for layer in self.__model.layers:
+            model.add(layer)
+            if layer.name == "fc1":
+                model.add(dropout1)
+            if layer.name == "fc2" and dropout_num > 1:
+                model.add(dropout2)
+        return model

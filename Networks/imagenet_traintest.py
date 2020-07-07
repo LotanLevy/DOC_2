@@ -28,12 +28,12 @@ class TrainTestHelper:
             with tf.GradientTape(persistent=True) as tape:
 
                 # Descriptiveness loss
-                prediction = self.model(ref_inputs, training=self.training)
+                prediction = self.model(ref_inputs, training=self.training, ref=True)
                 D_loss_value = self.D_loss_func(ref_labels, prediction)
                 self.D_loss_mean(D_loss_value)
 
                 # Compactness loss
-                prediction = self.model(tar_inputs, training=self.training)
+                prediction = self.model(tar_inputs, training=self.training, ref=False)
                 C_loss_value = self.C_loss_func(tar_labels, prediction)
                 self.C_loss_mean(C_loss_value)
 
