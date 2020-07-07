@@ -28,6 +28,9 @@ class TestHelper:
         plot_features(self.templates, self.targets, self.aliens, self.model, full_path, title)
 
 
+
+
+
 def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iteration, print_freq, test_helper, output_path):
 
 
@@ -145,7 +148,14 @@ def main():
     test_images, labels = ref_dataloader.read_batch(200, "test")
     save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "before_training", args.output_path)
 
+    random.seed(1234)
+    np.random.seed(1234)
+    tf.random.set_seed(1234)
+
     test_helper = TestHelper(ref_dataloader, tar_dataloader, args.templates_num, args.test_num, features_model)
+    random.seed(1234)
+    np.random.seed(1234)
+    tf.random.set_seed(1234)
 
 
     train(ref_dataloader, tar_dataloader, trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, test_helper, args.output_path)
