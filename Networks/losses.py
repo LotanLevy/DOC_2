@@ -3,7 +3,7 @@ import tensorflow as tf
 import numpy as np
 
 
-def compactnes_loss(target, pred):
+def compactnes_loss2(target, pred):
     n_dim = np.shape(pred)[0]  # number of features vecs
     k_dim = np.shape(pred)[1]  # feature vec dim
     loss = tf.constant(0.0)
@@ -22,7 +22,7 @@ def compactnes_loss(target, pred):
 
 
 
-def compactnes_loss2(target, pred):
+def compactnes_loss(target, pred):
     n_dim = np.shape(pred)[0] # number of features vecs
     k_dim = np.shape(pred)[1] # feature vec dim
     dot_sum = tf.constant(0.0)
