@@ -22,10 +22,10 @@ class TestHelper:
         self.model = model
 
     def get_roc_aoc(self):
-        return AOC_helper.get_roc_aoc(self.targets, self.aliens, self.templates, self.model)
+        return AOC_helper.get_roc_aoc(self.templates, self.targets, self.aliens, self.model)
 
     def plot_features(self, full_path, title):
-        plot_features(self.targets, self.aliens, self.templates, self.model, full_path, title)
+        plot_features(self.templates, self.targets, self.aliens, self.model, full_path, title)
 
 
 def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iteration, print_freq, test_helper, output_path):
