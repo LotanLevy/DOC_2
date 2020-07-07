@@ -14,7 +14,11 @@ class PerceptualModel(NNInterface):
     def __init__(self):
         super().__init__()
         self.__model = vgg16.VGG16(weights='imagenet')
-        self.__model.summary()
+
+    def get_features_model(self, layer_name):
+        layer = self.__model.get_layer(layer_name).output
+        model = Model(self.__model.input, outputs=layer)
+        return model
 
 
     def call(self, x, training=True):

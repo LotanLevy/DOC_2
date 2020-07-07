@@ -93,6 +93,7 @@ def get_args():
     parser.add_argument('--cls_num', type=int, default=1000, help='The number of classes in the dataset')
     parser.add_argument('--input_size', type=int, nargs=2, default=(224, 224))
 
+
     parser.add_argument('--ref_train_path', type=str, required=True)
     parser.add_argument('--ref_val_path', type=str, required=True)
     parser.add_argument('--ref_test_path', type=str, required=True)
@@ -107,6 +108,8 @@ def get_args():
     parser.add_argument('--lambd', type=float, default=0.1, help='lambda constant, the impact of the compactness loss')
     parser.add_argument('--templates_num', '-tn', type=int, default=40, help='The number pf templates in the testing')
     parser.add_argument('--test_num', type=int, default=100, help='The number of test examples to consider')
+    parser.add_argument('--test_layer', '-tl', default="fc2", help='The name of the network layer for the test output')
+
 
 
 
@@ -132,6 +135,9 @@ def main():
     optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr)
     D_loss = tf.keras.losses.CategoricalCrossentropy()
     C_loss = compactnes_loss
+    features_model = network.get_features_model(args.test_layer)
+
+
 
     trainer = TrainTestHelper(network, optimizer, D_loss, C_loss, args.lambd, training=True)
     validator = TrainTestHelper(network, optimizer, D_loss, C_loss, args.lambd, training=False)
@@ -139,7 +145,7 @@ def main():
     test_images, labels = ref_dataloader.read_batch(200, "test")
     save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "before_training", args.output_path)
 
-    test_helper = TestHelper(ref_dataloader, tar_dataloader, args.templates_num, args.test_num, network)
+    test_helper = TestHelper(ref_dataloader, tar_dataloader, args.templates_num, args.test_num, features_model)
 
 
     train(ref_dataloader, tar_dataloader, trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, test_helper, args.output_path)
