@@ -65,7 +65,7 @@ class FeaturesLoss:
         losses = np.zeros(preds_num)
         for i in range(preds_num):
             distances = []
-            for t in range(self.templates.shape[0]):
+            for t in range(self.templates_features.shape[0]):
                 distances.append(np.sqrt(float(np.dot(preds[i] - self.templates_features[t],
                                                       preds[i] - self.templates_features[t]))))  # Eucleaden distance
             losses[i] = min(distances)
