@@ -7,6 +7,7 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import os
 
+import tensorflow as tf
 
 
 
@@ -15,6 +16,11 @@ import os
 class AOC_helper:
     @staticmethod
     def get_roc_aoc(tamplates, targets, aliens, model):
+
+
+
+
+
         loss_func = FeaturesLoss(tamplates, model)
 
         target_num = len(targets)
