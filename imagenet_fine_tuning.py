@@ -56,7 +56,7 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
 
             print("iteration {} - train :D loss {}, C loss {}, val :D loss {}, C loss {}".format(i + 1, train_dict["train_D_loss"][-1], train_dict["train_C_loss"][-1], train_dict["val_D_loss"][-1], train_dict["val_C_loss"][-1]))
 
-        if i % (2 * print_freq): # test
+        if i % (2 * print_freq) == 0: # test
             test_dict["iteration"].append(i)
             test_results = test_helper.get_roc_aoc()
             test_dict["auc"].append(test_results[3])
@@ -64,8 +64,8 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
             test_dict["alien_dists"].append(test_results[5])
             test_helper.plot_features(os.path.join(output_path, "features_after_{}_iterations.png".format(i)))
 
-        plot_dict(test_dict, "iteration", output_path)
-        plot_dict(train_dict, "iteration", output_path)
+    plot_dict(test_dict, "iteration", output_path)
+    plot_dict(train_dict, "iteration", output_path)
 
 
 
