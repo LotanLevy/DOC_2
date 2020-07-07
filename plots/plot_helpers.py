@@ -31,7 +31,7 @@ class AOC_helper:
         scores[target_num:] = loss_func(None, preds)
         labels[target_num:] = np.ones(alien_num)
 
-        fpr, tpr, thresholds = roc_curve(labels, scores, 0)
+        fpr, tpr, thresholds = roc_curve(labels, -scores, 0)
         roc_auc = auc(fpr, tpr)
         return fpr, tpr, thresholds, roc_auc, np.mean(scores[:target_num]), np.mean(scores[target_num:])
 
