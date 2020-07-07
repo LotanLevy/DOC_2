@@ -62,7 +62,7 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
             test_dict["auc"].append(test_results[3])
             test_dict["target_dists"].append(test_results[4])
             test_dict["alien_dists"].append(test_results[5])
-            test_results.plot_features(os.path.join(output_path, "features_after_{}_iterations.png".format(i)))
+            test_helper.plot_features(os.path.join(output_path, "features_after_{}_iterations.png".format(i)))
 
         plot_dict(test_dict, "iteration", output_path)
         plot_dict(train_dict, "iteration", output_path)
