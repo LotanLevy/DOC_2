@@ -24,8 +24,8 @@ class TestHelper:
     def get_roc_aoc(self):
         return AOC_helper.get_roc_aoc(self.targets, self.aliens, self.templates, self.model)
 
-    def plot_features(self, full_path):
-        plot_features(self.targets, self.aliens, self.templates, self.model, full_path)
+    def plot_features(self, full_path, title):
+        plot_features(self.targets, self.aliens, self.templates, self.model, full_path, title)
 
 
 def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iteration, print_freq, test_helper, output_path):
@@ -62,7 +62,7 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
             test_dict["auc"].append(test_results[3])
             test_dict["target_dists"].append(test_results[4])
             test_dict["alien_dists"].append(test_results[5])
-            test_helper.plot_features(os.path.join(output_path, "features_after_{}_iterations.png".format(i)))
+            test_helper.plot_features(os.path.join(output_path, "features_after_{}_iterations.png".format(i)), "features_after_{}_iterations".format(i))
 
     plot_dict(test_dict, "iteration", output_path)
     plot_dict(train_dict, "iteration", output_path)

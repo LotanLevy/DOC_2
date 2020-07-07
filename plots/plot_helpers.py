@@ -36,7 +36,7 @@ class AOC_helper:
         return fpr, tpr, thresholds, roc_auc, np.mean(scores[:target_num]), np.mean(scores[target_num:])
 
 
-def plot_features(templates_images, target_images, alien_images, model, full_output_path):
+def plot_features(templates_images, target_images, alien_images, model, full_output_path, title):
     templates_preds = model(templates_images, training=False)
     target_preds = model(target_images, training=False)
     alien_preds = model(alien_images, training=False)
@@ -50,7 +50,7 @@ def plot_features(templates_images, target_images, alien_images, model, full_out
     plt.scatter(aliens_embedded[:, 0], aliens_embedded[:, 1], label="aliens")
     plt.legend()
 
-    plt.title(iter)
+    plt.title(title)
     plt.savefig(full_output_path)
     plt.close(f)
 
