@@ -105,6 +105,10 @@ def get_args():
     parser.add_argument('--batchs_num', '-bs', type=int, default=2, help='number of batches')
     parser.add_argument('--train_iterations', '-iter', type=int, default=800, help='The maximum iterations for learning')
     parser.add_argument('--lambd', type=float, default=0.1, help='lambda constant, the impact of the compactness loss')
+    parser.add_argument('--templates_num', '-tn', type=int, default=40, help='The number pf templates in the testing')
+    parser.add_argument('--test_num', type=int, default=100, help='The number of test examples to consider')
+
+
 
     return parser.parse_args()
 
