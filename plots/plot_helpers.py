@@ -16,11 +16,12 @@ import tensorflow as tf
 class AOC_helper:
     @staticmethod
     def get_roc_aoc(tamplates, targets, aliens, model):
+        fpr, tpr, thresholds, roc_auc, target_scores, alien_scores = AOC_helper.get_roc_aoc_with_scores(tamplates, targets, aliens, model)
 
+        return fpr, tpr, thresholds, roc_auc, np.mean(target_scores), np.mean(alien_scores)
 
-
-
-
+    @staticmethod
+    def get_roc_aoc_with_scores(tamplates, targets, aliens, model):
         loss_func = FeaturesLoss(tamplates, model)
 
         target_num = len(targets)
@@ -39,7 +40,9 @@ class AOC_helper:
 
         fpr, tpr, thresholds = roc_curve(labels, -scores, 0)
         roc_auc = auc(fpr, tpr)
-        return fpr, tpr, thresholds, roc_auc, np.mean(scores[:target_num]), np.mean(scores[target_num:])
+        return fpr, tpr, thresholds, roc_auc, scores[:target_num], scores[target_num:]
+
+
 
 
 def plot_features(templates_images, target_images, alien_images, model, full_output_path, title):
@@ -70,3 +73,6 @@ def plot_dict(dict, x_key, output_path):
             plt.savefig(os.path.join(output_path, key))
             plt.close(f)
     plt.close("all")
+
+
+

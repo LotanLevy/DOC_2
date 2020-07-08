@@ -51,34 +51,65 @@ class DataLoader:
 
         self.batches_idx = {"train": 0, "val": 0, "test": 0}
 
-
-
-    def read_batch(self, batch_size, mode):
+    def read_batch_with_details(self, batch_size, mode):
         all_paths, all_labels = self.datasets[mode]
 
         indices = list(range(self.batches_idx[mode], min(self.batches_idx[mode] + batch_size, len(all_paths))))
         if len(indices) < batch_size:
             self.batches_idx[mode] = 0
-            rest = batch_size-len(indices)
+            rest = batch_size - len(indices)
             indices += list(range(self.batches_idx[mode], min(self.batches_idx[mode] + rest, len(all_paths))))
 
         self.batches_idx[mode] += batch_size
-
-
 
         # rand_idx = np.random.randint(low=0, high=len(all_paths)-1, size=batch_size).astype(np.int)
 
         batch_labels = all_labels[indices]
         batch_images = np.zeros((batch_size, self.input_size[0], self.input_size[1], 3))
+        paths = []
+        labels = []
         b_idx = 0
         for i in indices:
             batch_images[b_idx, :, :, :] = read_image(all_paths[i], self.input_size)
-            self.paths_logger[mode].append(all_paths[i])
-            self.labels_logger[mode].append(all_labels[i])
+            paths.append(all_paths[i])
+            labels.append(all_labels[i])
             b_idx += 1
 
         hot_vecs = tf.keras.utils.to_categorical(batch_labels, num_classes=self.classes_num)
+        return batch_images, hot_vecs, paths, labels
+
+
+
+    def read_batch(self, batch_size, mode):
+        batch_images, hot_vecs, paths, labels = self.read_batch_with_details(batch_size, mode)
+        self.paths_logger[mode] += paths
+        self.labels_logger[mode] += labels
         return batch_images, hot_vecs
+        # all_paths, all_labels = self.datasets[mode]
+        #
+        # indices = list(range(self.batches_idx[mode], min(self.batches_idx[mode] + batch_size, len(all_paths))))
+        # if len(indices) < batch_size:
+        #     self.batches_idx[mode] = 0
+        #     rest = batch_size-len(indices)
+        #     indices += list(range(self.batches_idx[mode], min(self.batches_idx[mode] + rest, len(all_paths))))
+        #
+        # self.batches_idx[mode] += batch_size
+        #
+        #
+        #
+        # # rand_idx = np.random.randint(low=0, high=len(all_paths)-1, size=batch_size).astype(np.int)
+        #
+        # batch_labels = all_labels[indices]
+        # batch_images = np.zeros((batch_size, self.input_size[0], self.input_size[1], 3))
+        # b_idx = 0
+        # for i in indices:
+        #     batch_images[b_idx, :, :, :] = read_image(all_paths[i], self.input_size)
+        #     self.paths_logger[mode].append(all_paths[i])
+        #     self.labels_logger[mode].append(all_labels[i])
+        #     b_idx += 1
+        #
+        # hot_vecs = tf.keras.utils.to_categorical(batch_labels, num_classes=self.classes_num)
+        # return batch_images, hot_vecs
 
     def __del__(self):
         for mode in self.paths_logger:

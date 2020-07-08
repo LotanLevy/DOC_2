@@ -13,20 +13,7 @@ from plots.plot_helpers import AOC_helper, plot_features, plot_dict
 
 
 
-
-class TestHelper:
-    def __init__(self, ref_dataloader, tar_dataloader, templates_num, test_num, model):
-        self.templates, _ = tar_dataloader.read_batch(templates_num, "train")
-        self.targets, _ = tar_dataloader.read_batch(test_num, "test")
-        self.aliens, _ = ref_dataloader.read_batch(test_num, "test")
-        self.model = model
-
-    def get_roc_aoc(self):
-        return AOC_helper.get_roc_aoc(self.templates, self.targets, self.aliens, self.model)
-
-    def plot_features(self, full_path, title):
-        plot_features(self.templates, self.targets, self.aliens, self.model, full_path, title)
-
+from TestHelper import TestHelper
 
 
 
@@ -154,7 +141,7 @@ def main():
     np.random.seed(1234)
     tf.random.set_seed(1234)
 
-    test_helper = TestHelper(ref_dataloader, tar_dataloader, args.templates_num, args.test_num, features_model)
+    test_helper = TestHelper(ref_dataloader, tar_dataloader, args.templates_num, args.test_num, features_model, args.output_path)
     random.seed(1234)
     np.random.seed(1234)
     tf.random.set_seed(1234)
