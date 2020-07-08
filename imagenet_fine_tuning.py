@@ -18,7 +18,7 @@ from TestHelper import TestHelper
 
 
 
-def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iteration, print_freq, test_helper, output_path):
+def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iteration, print_freq, test_helper, output_path, network):
 
 
     trainstep = trainer.get_step()
@@ -53,6 +53,8 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
             test_dict["target_dists"].append(test_results[4])
             test_dict["alien_dists"].append(test_results[5])
             test_helper.plot_features(os.path.join(output_path, "features_after_{}_iterations.png".format(i)), "features_after_{}_iterations".format(i))
+
+            network.save_model(i, output_path)
 
     plot_dict(test_dict, "iteration", output_path)
     plot_dict(train_dict, "iteration", output_path)
@@ -148,7 +150,7 @@ def main():
     tf.random.set_seed(1234)
 
 
-    train(ref_dataloader, tar_dataloader, trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, test_helper, args.output_path)
+    train(ref_dataloader, tar_dataloader, trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, test_helper, args.output_path, network)
     save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "after_training", args.output_path)
 
     network.save_model(args.train_iterations, args.output_path)
