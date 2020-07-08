@@ -1,5 +1,5 @@
 
-from plots.plot_helpers import AOC_helper, plot_features
+from plots.plot_helpers import AOC_helper, plot_features, HotMapHelper
 import numpy as np
 import os
 import argparse
@@ -31,6 +31,13 @@ class TestHelper:
         labels = [int(s < threshold) for s in scores]
         return labels
 
+    def predict_hot_maps(self, im_paths, kernel_size, stride, input_size):
+        helper = HotMapHelper(self.templates, self.model, input_size)
+        for path in im_paths:
+            helper.test_with_square(path, kernel_size, stride, self.output_path)
+
+
+
     def save_prediction(self, fpr, tpr, thresholds, scores, alien=True):
         # fpr, tpr, thresholds, roc_auc, target_dists, alien_dists = AOC_helper.get_roc_aoc_with_scores(self.templates, self.targets, self.aliens, self.model)
         paths = self.ref_paths if alien else self.tar_paths
@@ -59,6 +66,8 @@ class TestHelper:
 
 
 
+
+
 def get_args():
     parser = argparse.ArgumentParser(description='Process training arguments.')
     parser.add_argument('--nntype', default="PerceptualModel", help='The type of the network')
@@ -74,17 +83,14 @@ def get_args():
     parser.add_argument('--tar_val_path', type=str, required=True)
     parser.add_argument('--tar_test_path', type=str, required=True)
     parser.add_argument('--output_path', type=str, default=os.getcwd(), help='The path to keep the output')
-    parser.add_argument('--print_freq', '-pf', type=int, default=50)
-    parser.add_argument('--lr', type=float, default=5e-5, help='learning rate')
-    parser.add_argument('--batchs_num', '-bs', type=int, default=2, help='number of batches')
-    parser.add_argument('--train_iterations', '-iter', type=int, default=800, help='The maximum iterations for learning')
-    parser.add_argument('--lambd', type=float, default=0.1, help='lambda constant, the impact of the compactness loss')
     parser.add_argument('--templates_num', '-tn', type=int, default=40, help='The number pf templates in the testing')
     parser.add_argument('--test_num', type=int, default=100, help='The number of test examples to consider')
     parser.add_argument('--test_layer', '-tl', default="fc2", help='The name of the network layer for the test output')
 
 
-
+    parser.add_argument('--hot_map_paths',  type=str, default="None")
+    parser.add_argument('--kernel_size', '-ks', type=int, default=24)
+    parser.add_argument('--stride', '-s', type=int, default=10)
 
     return parser.parse_args()
 
@@ -110,6 +116,15 @@ def main():
 
 
     test_helper = TestHelper(ref_dataloader, tar_dataloader, args.templates_num, args.test_num, features_model, args.output_path)
+
+    if args.hot_map_paths != None:
+        paths = []
+        with open(args.hot_map_paths, "r") as f:
+            for line in f:
+                paths.append(line.rstrip('\n'))
+        test_helper.predict_hot_maps(paths, args.kernel_size, args.stride, args.input_size)
+
+
 
 
 if __name__ == "__main__":

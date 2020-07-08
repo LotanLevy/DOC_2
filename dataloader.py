@@ -6,8 +6,15 @@ from PIL import Image
 import tensorflow as tf
 import os
 import random
+import re
+
 
 SPLIT_FACTOR = "$"
+
+def image_name(image_path):
+    regex = ".*[\\/|\\\](.*)[\\/|\\\](.*).jpg"
+    m = re.match(regex, image_path)
+    return m.group(1) + "_" + m.group(2)
 
 
 def read_image(path, resize_image=()):
