@@ -64,7 +64,6 @@ class HotMapHelper:
             while c < im.shape[2] - int(np.ceil(kernel_size / 2)):
                 image_cp = im.copy()
                 k1, k2 = int(np.floor(kernel_size / 2)), int(np.ceil(kernel_size / 2))
-                print(r, c)
                 image_cp[0, r - k1: r + k2, c - k1: c + k2, :] = 0
 
                 pred = self.model(image_cp)
