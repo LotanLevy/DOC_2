@@ -3,6 +3,7 @@ from Networks.NNInterface import NNInterface
 from tensorflow.python.keras.applications import vgg16
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.layers import Dropout
+import os
 
 
 
@@ -78,3 +79,14 @@ class PerceptualModel(NNInterface):
             if layer.name == "fc2" and dropout_num > 1:
                 model.add(dropout2)
         return model
+
+    def save_model(self, iter_num, output_path):
+        output_path = os.path.join(output_path, "ckpts")
+        checkpoint_path = "weights_after_{}_iterations.ckpt".format(iter_num)
+        self.__model.save_weights(os.path.join(output_path, checkpoint_path))
+
+    def load_model(self, ckpt_path):
+        ckpt_path = os.path.join(ckpt_path, "ckpts")
+
+        self.__model.load_weights(ckpt_path)
+

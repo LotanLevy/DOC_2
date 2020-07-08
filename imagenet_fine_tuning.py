@@ -59,6 +59,7 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
 
 
 
+
 def get_imagenet_prediction(image, hot_vec,  network, loss_func):
     pred = network(image, training=False)
     i = tf.math.argmax(pred[0])
@@ -149,6 +150,8 @@ def main():
 
     train(ref_dataloader, tar_dataloader, trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, test_helper, args.output_path)
     save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "after_training", args.output_path)
+
+    network.save_model(args.train_iterations, args.output_path)
 
 
 
