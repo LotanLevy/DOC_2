@@ -82,11 +82,11 @@ class PerceptualModel(NNInterface):
 
     def save_model(self, iter_num, output_path):
         output_path = os.path.join(output_path, "ckpts")
-        checkpoint_path = "weights_after_{}_iterations.ckpt".format(iter_num)
+        checkpoint_path = "weights_after_{}_iterations".format(iter_num)
         self.__model.save_weights(os.path.join(output_path, checkpoint_path))
 
+
     def load_model(self, ckpt_path):
-        ckpt_path = os.path.join(ckpt_path, "ckpts")
 
         self.__model.load_weights(ckpt_path)
 
