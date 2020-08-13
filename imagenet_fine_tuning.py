@@ -87,6 +87,10 @@ def get_args():
     parser.add_argument('--input_size', type=int, nargs=2, default=(224, 224))
 
 
+    parser.add_argument('--ckpt', type=str, default=None, required=True)
+
+
+
     parser.add_argument('--ref_train_path', type=str, required=True)
     parser.add_argument('--ref_val_path', type=str, required=True)
     parser.add_argument('--ref_test_path', type=str, required=True)
@@ -127,6 +131,8 @@ def main():
                             name="tar_dataloader", output_path=args.output_path)
     network = utils.get_network(args.nntype)
     network.freeze_layers(19)
+    if args.ckpt is not None:
+        network.load_weights(args.ckpt).expect_partial()  # expect_partial enables to ignore training information for prediction
     optimizer = tf.keras.optimizers.Adam(learning_rate=args.lr)
     D_loss = tf.keras.losses.CategoricalCrossentropy()
     C_loss = compactnes_loss
