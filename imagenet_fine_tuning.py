@@ -87,7 +87,7 @@ def get_args():
     parser.add_argument('--input_size', type=int, nargs=2, default=(224, 224))
 
 
-    parser.add_argument('--ckpt', type=str, default=None, required=True)
+    parser.add_argument('--ckpt', type=str, default=None)
 
 
 
