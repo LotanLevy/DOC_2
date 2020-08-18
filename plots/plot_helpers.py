@@ -82,7 +82,6 @@ class HotMapHelper:
         title = "hot_map_of_{}_with_kernel_{}_and_stride_{}".format(im_name, kernel_size, stride)
         plt.title(title)
         plt.savefig(os.path.join(output_path, title + ".png"))
-        plt.show()
 
 
 

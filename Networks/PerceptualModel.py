@@ -15,8 +15,8 @@ class PerceptualModel(NNInterface):
     def __init__(self):
         super().__init__()
         self.__model = vgg16.VGG16(weights='imagenet')
-        self.ref_model = self.get_dropout_model(2)
-        self.tar_model = self.get_dropout_model(1)
+        self.ref_model = self.get_dropout_model(0)
+        self.tar_model = self.get_dropout_model(0)
         print(self.tar_model.summary())
 
     def get_features_model(self, layer_name):
@@ -74,7 +74,7 @@ class PerceptualModel(NNInterface):
 
         for layer in self.__model.layers:
             model.add(layer)
-            if layer.name == "fc1":
+            if layer.name == "fc1" and dropout_num > 0:
                 model.add(dropout1)
             if layer.name == "fc2" and dropout_num > 1:
                 model.add(dropout2)
@@ -87,6 +87,5 @@ class PerceptualModel(NNInterface):
 
 
     def load_model(self, ckpt_path):
-
         self.__model.load_weights(ckpt_path)
 
