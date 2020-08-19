@@ -23,7 +23,8 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
 
     trainstep = trainer.get_step()
     valstep = validator.get_step()
-    train_dict = {"iteration":[], "train_D_loss": [], "train_C_loss": [], "val_D_loss": [], "val_C_loss": []}
+    train_dict = {"iteration":[], "train_D_loss": [], "train_C_loss": [], "train_accuracy": [],
+                  "val_D_loss": [], "val_C_loss": [], "val_accuracy": []}
     test_dict = {"iteration":[], "auc": [], "target_dists": [], "alien_dists":[]}
 
 
