@@ -14,6 +14,9 @@ class TrainTestHelper:
 
         self.D_loss_mean = tf.keras.metrics.Mean(name='D_loss')
         self.C_loss_mean = tf.keras.metrics.Mean(name='C_loss')
+        self.accuracy = tf.keras.metrics.Accuracy(name='accuracy')
+
+
         self.lambd = lambd
 
         self.training = training
@@ -31,6 +34,7 @@ class TrainTestHelper:
                 prediction = self.model(ref_inputs, training=self.training, ref=True)
                 D_loss_value = self.D_loss_func(ref_labels, prediction)
                 self.D_loss_mean(D_loss_value)
+                self.accuracy.update_state(ref_labels, prediction)
 
                 # Compactness loss
                 prediction = self.model(tar_inputs, training=self.training, ref=False)
@@ -48,6 +52,10 @@ class TrainTestHelper:
                     total_gradient.append(D_gradients[i] * (1 - self.lambd) + C_gradients[i] * self.lambd)
 
                 self.optimizer.apply_gradients(zip(total_gradient, self.model.trainable_variables))
+            return {'D_loss': self.D_loss_mean.result(),
+                    'C_loss': self.C_loss_mean.result(),
+                    'accuracy': self.accuracy.result()}
+
         return train_step
 
 

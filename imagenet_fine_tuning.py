@@ -31,20 +31,32 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
         ref_batch_x, ref_batch_y = ref_dataloader.read_batch(batches, "train")
         tar_batch_x, tar_batch_y = tar_dataloader.read_batch(batches, "train")
 
-        trainstep(ref_batch_x, ref_batch_y, tar_batch_x, tar_batch_y)
+        train_output = trainstep(ref_batch_x, ref_batch_y, tar_batch_x, tar_batch_y)
         if i % print_freq == 0:  # validation loss
             ref_batch_x, ref_batch_y = ref_dataloader.read_batch(batches, "val")
             tar_batch_x, tar_batch_y = tar_dataloader.read_batch(batches, "val")
 
-            valstep(ref_batch_x, ref_batch_y, tar_batch_x, tar_batch_y)
+            val_output = valstep(ref_batch_x, ref_batch_y, tar_batch_x, tar_batch_y)
+
+
 
             train_dict["iteration"].append(i)
-            train_dict["train_D_loss"].append(float(trainer.D_loss_mean.result()))
-            train_dict["train_C_loss"].append(float(trainer.C_loss_mean.result()))
-            train_dict["val_D_loss"].append(float(validator.D_loss_mean.result()))
-            train_dict["val_C_loss"].append(float(validator.C_loss_mean.result()))
+            train_dict["train_D_loss"].append(float(train_output['D_loss']))
+            train_dict["train_C_loss"].append(float(train_output['C_loss']))
+            train_dict["train_accuracy"].append(float(train_output['accuracy']))
 
-            print("iteration {} - train :D loss {}, C loss {}, val :D loss {}, C loss {}".format(i + 1, train_dict["train_D_loss"][-1], train_dict["train_C_loss"][-1], train_dict["val_D_loss"][-1], train_dict["val_C_loss"][-1]))
+            train_dict["val_D_loss"].append(float(val_output['D_loss']))
+            train_dict["val_C_loss"].append(float(val_output['C_loss']))
+            train_dict["val_accuracy"].append(float(val_output['accuracy']))
+
+            print_output = ""
+            for key in train_dict.keys():
+                print_output += "{}: {},".format(key, train_dict[key][-1])
+
+            #
+            #
+            # print("iteration {} - train :"
+            #       "D loss {}, C loss {}, val :D loss {}, C loss {}".format(i + 1, train_dict["train_D_loss"][-1], train_dict["train_C_loss"][-1], train_dict["val_D_loss"][-1], train_dict["val_C_loss"][-1]))
 
         if i % (2 * print_freq) == 0: # test
             test_dict["iteration"].append(i)
