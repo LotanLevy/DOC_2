@@ -193,7 +193,7 @@ def main():
     # tf.random.set_seed(1234)
 
 
-    train(ref_dataloader, tar_dataloader, trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, test_helper, args.output_path, network)
+    train((ref_train_datagen, ref_val_datagen), (tar_train_datagen, tar_val_datagen), trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, None, args.output_path, network)
     # save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "after_training", args.output_path)
 
     network.save_model(args.train_iterations, args.output_path)
