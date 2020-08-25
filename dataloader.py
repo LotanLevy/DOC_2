@@ -126,6 +126,45 @@ class DataLoader:
 
 
 
+def create_generators(ref_path, tar_path, ref_aug, tar_aug, input_size, batch_size):
+    ref_gen = tf.keras.preprocessing.image.ImageDataGenerator(
+            validation_split=0.2)
+    ref_classes = [str(i) for i in range(1000)]
+    ref_train_datagen = ref_gen.flow_from_directory(ref_path, subset="training",
+                                                      seed=123,
+                                                      shuffle=True,
+                                                      class_mode="categorical",
+                                                      target_size=input_size,
+                                                      batch_size=batch_size, classes=ref_classes)
+    ref_val_datagen = ref_gen.flow_from_directory(ref_path, subset="validation",
+                                                      seed=123,
+                                                      shuffle=True,
+                                                      class_mode="categorical",
+                                                      target_size=input_size,
+                                                      batch_size=batch_size, classes=ref_classes)
+
+
+    tar_gen = tf.keras.preprocessing.image.ImageDataGenerator(
+            validation_split=0.2)
+    tar_train_datagen = tar_gen.flow_from_directory(tar_path, subset="training",
+                                                      seed=123,
+                                                      shuffle=True,
+                                                      class_mode="categorical",
+                                                      target_size=input_size,
+                                                      batch_size=batch_size, classes=ref_classes)
+    tar_val_datagen = tar_gen.flow_from_directory(tar_path, subset="validation",
+                                                      seed=123,
+                                                      shuffle=True,
+                                                      class_mode="categorical",
+                                                      target_size=input_size,
+                                                      batch_size=batch_size, classes=ref_classes)
+
+    return ref_train_datagen, ref_val_datagen, tar_train_datagen, tar_val_datagen
+
+
+
+
+
 
 
 

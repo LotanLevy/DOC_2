@@ -11,6 +11,9 @@ from Networks.losses import compactnes_loss
 import random
 from plots.plot_helpers import AOC_helper, plot_features, plot_dict
 
+from dataloader import create_generators
+
+
 
 
 from TestHelper import TestHelper
@@ -21,6 +24,11 @@ from TestHelper import TestHelper
 def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iteration, print_freq, test_helper, output_path, network):
 
 
+    ref_train_gen, ref_val_gen = ref_dataloader
+
+    tar_train_gen, tar_val_gen = tar_dataloader
+
+
     trainstep = trainer.get_step()
     valstep = validator.get_step()
     train_dict = {"iteration":[], "train_D_loss": [], "train_C_loss": [], "train_accuracy": [],
@@ -29,15 +37,21 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
 
 
     for i in range(max_iteration):
-        ref_batch_x, ref_batch_y = ref_dataloader.read_batch(batches, "train")
-        tar_batch_x, tar_batch_y = tar_dataloader.read_batch(batches, "train")
+        ref_inputs, ref_labels = ref_train_gen.next()
+        tar_inputs, tar_labels = tar_train_gen.next()
+        # ref_batch_x, ref_batch_y = ref_dataloader.read_batch(batches, "train")
+        # tar_batch_x, tar_batch_y = tar_dataloader.read_batch(batches, "train")
+        # val_output = trainstep(ref_batch_x, ref_batch_y, tar_batch_x, tar_batch_y)
 
-        train_output = trainstep(ref_batch_x, ref_batch_y, tar_batch_x, tar_batch_y)
+        train_output = trainstep(ref_inputs, ref_labels, tar_inputs, tar_labels)
         if i % print_freq == 0:  # validation loss
-            ref_batch_x, ref_batch_y = ref_dataloader.read_batch(batches, "val")
-            tar_batch_x, tar_batch_y = tar_dataloader.read_batch(batches, "val")
+            ref_inputs, ref_labels = ref_val_gen.next()
+            tar_inputs, tar_labels = tar_val_gen.next()
 
-            val_output = valstep(ref_batch_x, ref_batch_y, tar_batch_x, tar_batch_y)
+            # ref_batch_x, ref_batch_y = ref_dataloader.read_batch(batches, "val")
+            # tar_batch_x, tar_batch_y = tar_dataloader.read_batch(batches, "val")
+
+            val_output = valstep(ref_inputs, ref_labels, tar_inputs, tar_labels)
 
 
 
@@ -59,15 +73,15 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
             # print("iteration {} - train :"
             #       "D loss {}, C loss {}, val :D loss {}, C loss {}".format(i + 1, train_dict["train_D_loss"][-1], train_dict["train_C_loss"][-1], train_dict["val_D_loss"][-1], train_dict["val_C_loss"][-1]))
 
-        if i % (2 * print_freq) == 0: # test
-            test_dict["iteration"].append(i)
-            test_results = test_helper.get_roc_aoc()
-            test_dict["auc"].append(test_results[3])
-            test_dict["target_dists"].append(test_results[4])
-            test_dict["alien_dists"].append(test_results[5])
-            test_helper.plot_features(os.path.join(output_path, "features_after_{}_iterations.png".format(i)), "features_after_{}_iterations".format(i))
-
-            network.save_model(i, output_path)
+        # if i % (2 * print_freq) == 0: # test
+        #     test_dict["iteration"].append(i)
+        #     test_results = test_helper.get_roc_aoc()
+        #     test_dict["auc"].append(test_results[3])
+        #     test_dict["target_dists"].append(test_results[4])
+        #     test_dict["alien_dists"].append(test_results[5])
+        #     test_helper.plot_features(os.path.join(output_path, "features_after_{}_iterations.png".format(i)), "features_after_{}_iterations".format(i))
+        #
+        #     network.save_model(i, output_path)
 
     plot_dict(test_dict, "iteration", output_path)
     plot_dict(train_dict, "iteration", output_path)
@@ -103,13 +117,13 @@ def get_args():
     # parser.add_argument('--ckpt', type=str, default=None)
 
 
-
-    parser.add_argument('--ref_train_path', type=str, required=True)
-    parser.add_argument('--ref_val_path', type=str, required=True)
-    parser.add_argument('--ref_test_path', type=str, required=True)
-    parser.add_argument('--tar_train_path', type=str, required=True)
-    parser.add_argument('--tar_val_path', type=str, required=True)
-    parser.add_argument('--tar_test_path', type=str, required=True)
+    #
+    # parser.add_argument('--ref_train_path', type=str, required=True)
+    # parser.add_argument('--ref_val_path', type=str, required=True)
+    # parser.add_argument('--ref_test_path', type=str, required=True)
+    # parser.add_argument('--tar_train_path', type=str, required=True)
+    # parser.add_argument('--tar_val_path', type=str, required=True)
+    # parser.add_argument('--tar_test_path', type=str, required=True)
     parser.add_argument('--output_path', type=str, default=os.getcwd(), help='The path to keep the output')
     parser.add_argument('--print_freq', '-pf', type=int, default=50)
     parser.add_argument('--lr', type=float, default=5e-5, help='learning rate')
@@ -119,6 +133,14 @@ def get_args():
     parser.add_argument('--templates_num', '-tn', type=int, default=40, help='The number pf templates in the testing')
     parser.add_argument('--test_num', type=int, default=100, help='The number of test examples to consider')
     parser.add_argument('--test_layer', '-tl', default="fc2", help='The name of the network layer for the test output')
+
+    parser.add_argument("--ref_path", required=True,
+                        help="The directory of the reference dataset")
+    parser.add_argument("--tar_path", required=True,
+                        help="The directory of the target dataset")
+
+    parser.add_argument("--ref_aug", action='store_true')
+    parser.add_argument("--tar_aug", action='store_true')
 
 
 
@@ -135,13 +157,15 @@ def main():
     if not os.path.exists(args.output_path):
         os.makedirs(args.output_path)
 
+    ref_train_datagen, ref_val_datagen, tar_train_datagen, tar_val_datagen = create_generators(
+        args.ref_path, args.tar_path,
+        args.ref_aug, args.tar_aug,
+        args.input_size, args.batch_size)
 
-
-
-    ref_dataloader = DataLoader(args.ref_train_path, args.ref_val_path, args.ref_test_path, args.cls_num, args.input_size,
-                            name="ref_dataloader", output_path=args.output_path)
-    tar_dataloader = DataLoader(args.tar_train_path, args.tar_val_path, args.tar_test_path, args.cls_num, args.input_size,
-                            name="tar_dataloader", output_path=args.output_path)
+    # ref_dataloader = DataLoader(args.ref_train_path, args.ref_val_path, args.ref_test_path, args.cls_num, args.input_size,
+    #                         name="ref_dataloader", output_path=args.output_path)
+    # tar_dataloader = DataLoader(args.tar_train_path, args.tar_val_path, args.tar_test_path, args.cls_num, args.input_size,
+    #                         name="tar_dataloader", output_path=args.output_path)
     network = utils.get_network(args.nntype)
     network.freeze_layers(19)
     #if args.ckpt is not None:
@@ -156,21 +180,21 @@ def main():
     trainer = TrainTestHelper(network, optimizer, D_loss, C_loss, args.lambd, training=True)
     validator = TrainTestHelper(network, optimizer, D_loss, C_loss, args.lambd, training=False)
 
-    test_images, labels = ref_dataloader.read_batch(200, "test")
-    save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "before_training", args.output_path)
-
-    random.seed(1234)
-    np.random.seed(1234)
-    tf.random.set_seed(1234)
-
-    test_helper = TestHelper(ref_dataloader, tar_dataloader, args.templates_num, args.test_num, features_model, args.output_path)
-    random.seed(1234)
-    np.random.seed(1234)
-    tf.random.set_seed(1234)
+    # test_images, labels = ref_dataloader.read_batch(200, "test")
+    # save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "before_training", args.output_path)
+    #
+    # random.seed(1234)
+    # np.random.seed(1234)
+    # tf.random.set_seed(1234)
+    #
+    # test_helper = TestHelper(ref_dataloader, tar_dataloader, args.templates_num, args.test_num, features_model, args.output_path)
+    # random.seed(1234)
+    # np.random.seed(1234)
+    # tf.random.set_seed(1234)
 
 
     train(ref_dataloader, tar_dataloader, trainer, validator, args.batchs_num, args.train_iterations, args.print_freq, test_helper, args.output_path, network)
-    save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "after_training", args.output_path)
+    # save_predicted_results(test_images, labels, network, ref_dataloader.paths_logger["test"], D_loss, "after_training", args.output_path)
 
     network.save_model(args.train_iterations, args.output_path)
 
