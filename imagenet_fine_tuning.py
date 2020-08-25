@@ -160,7 +160,7 @@ def main():
     ref_train_datagen, ref_val_datagen, tar_train_datagen, tar_val_datagen = create_generators(
         args.ref_path, args.tar_path,
         args.ref_aug, args.tar_aug,
-        args.input_size, args.batch_size)
+        args.input_size, args.batchs_num)
 
     # ref_dataloader = DataLoader(args.ref_train_path, args.ref_val_path, args.ref_test_path, args.cls_num, args.input_size,
     #                         name="ref_dataloader", output_path=args.output_path)
