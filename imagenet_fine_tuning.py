@@ -54,10 +54,10 @@ def train(ref_dataloader,tar_dataloader, trainer, validator, batches, max_iterat
             for key in train_dict.keys():
                 print_output += "{}: {},".format(key, train_dict[key][-1])
 
-            #
-            #
-            # print("iteration {} - train :"
-            #       "D loss {}, C loss {}, val :D loss {}, C loss {}".format(i + 1, train_dict["train_D_loss"][-1], train_dict["train_C_loss"][-1], train_dict["val_D_loss"][-1], train_dict["val_C_loss"][-1]))
+
+
+            print("iteration {} - train :"
+                  "D loss {}, C loss {}, val :D loss {}, C loss {}".format(i + 1, train_dict["train_D_loss"][-1], train_dict["train_C_loss"][-1], train_dict["val_D_loss"][-1], train_dict["val_C_loss"][-1]))
 
         if i % (2 * print_freq) == 0: # test
             test_dict["iteration"].append(i)
